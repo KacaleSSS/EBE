@@ -206,13 +206,25 @@ class TransferTest(unittest.TestCase):
         self.save_receipt({"schema": 1, "results": [dict(item, status="downloaded", file="payload.txt",
                            sha256=digest, content_type="text/plain") for item in requests]})
         original_open = Path.open
+        resolved_payload = payload.resolve()
         reads = []
 
         def bounded_open(path, *args, **kwargs):
-            if path == payload and args == ("rb",):
+            mode = args[0] if args else kwargs.get("mode", "r")
+            if mode == "rb" and path.resolve() == resolved_payload:
                 reads.append(path)
                 return io.BytesIO(body)
             return original_open(path, *args, **kwargs)
+
+        # Portable alias fixture: exercise different lexical paths without
+        # depending on Windows 8.3 names or symlink permissions on CI.
+        alias = payload.parent / ".." / payload.parent.name / payload.name
+        self.assertNotEqual(alias, payload)
+        for args, kwargs in ((("rb",), {}), ((), {"mode": "rb"})):
+            with bounded_open(alias, *args, **kwargs) as handle:
+                self.assertIsInstance(handle, io.BytesIO)
+            self.assertEqual(reads, [alias])
+            reads.clear()
 
         with mock.patch.object(Path, "open", bounded_open), mock.patch.object(
             self.engine, "ingest_saved_file") as ingest:

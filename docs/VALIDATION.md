@@ -2,7 +2,9 @@
 
 ## 可复现检查
 
-冻结代码本地回归：Windows / Python 3.12 为 **290 passed、2 skipped、481 subtests passed**；Linux / Python 3.11 为 **291 passed、1 skipped、481 subtests passed**。CI 另覆盖 Python 3.11/3.12/3.13 与 Docker 构建，实际状态见 Actions，不能以本地结果代称 CI 已通过。
+首轮跨平台回归：Windows / Python 3.12 为 **290 passed、2 skipped、481 subtests passed**；Linux / Python 3.11 为 **291 passed、1 skipped、481 subtests passed**。后续新增空项目回归并修正 Windows 路径别名测试夹具。CI 覆盖 Python 3.11/3.12/3.13 与 Docker 构建，最终提交状态见 [Actions](https://github.com/KacaleSSS/EBE/actions)，不能以本地结果代称 CI 已通过。
+
+源码压缩包安装器已在 Windows / Python 3.14 与 Linux / Python 3.11 实测安装成功并执行 doctor；wheel 在项目目录外的干净 Python 3.12 venv 完成安装、init/status，并检查空项目没有数据表错误。CI 同时验证 Windows/Linux 的安装器。
 
 ```sh
 python -m pip install '.[test]'
@@ -27,7 +29,7 @@ Linux 未安装支持中文的 TTF 时，中文 PDF 布局测试显式跳过；W
 
 ## 隔离与性能结论的范围
 
-临时 Linux 容器以 `--network none` 运行时，原生 socket 无法连接公网。目标 Dockerfile 的构建和隔离 smoke 由仓库 CI 单独检查；若构建服务不可达，应记作外部验证未完成，不能替代为构建通过。
+临时 Linux 容器以 `--network none` 运行时，原生 socket 无法连接公网。目标 Dockerfile 已通过首轮仓库 CI 的正式构建、非 root/只读/无网络环境 doctor 和初始化，以及原生 socket 出网拒绝测试。各提交仍独立重跑，最终状态见 Actions。远程开发主机曾因 DockerHub 不可达无法拉取基础镜像，该外部失败不冒充成功结果。
 
 并发单测对8份合成响应注入每份100ms等待，检查串行峰值1和四并发峰值4。耗时比仅为该夹具结果，不承诺真实网络固定倍数提速；实际速度受站点限流、带宽、文档解析和存储影响。
 
