@@ -1,0 +1,71 @@
+{
+  "test_data": "synthetic-only; no user manuscripts or knowledge-base material",
+  "review": {
+    "requested_model": "deepseek-v4-flash",
+    "returned_model": "deepseek-v4-flash",
+    "usage": {
+      "prompt_tokens": 871,
+      "completion_tokens": 411,
+      "total_tokens": 1341,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "audio_tokens": 0,
+        "text_tokens": 0,
+        "image_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "audio_tokens": 0,
+        "text_tokens": 0,
+        "image_tokens": 0
+      },
+      "cost": 1e-05
+    },
+    "seconds": 38.242
+  },
+  "review_checks": {
+    "machine_valid": true,
+    "verified": false,
+    "status": "unverified",
+    "review_status": "support",
+    "needs_escalation": false,
+    "errors": [],
+    "review_scope": "excerpts_only",
+    "full_document_review": false
+  },
+  "draft": {
+    "requested_model": "deepseek-v4-flash",
+    "returned_model": "deepseek-v4-flash",
+    "usage": {
+      "prompt_tokens": 276,
+      "completion_tokens": 1195,
+      "total_tokens": 1530,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "audio_tokens": 0,
+        "text_tokens": 0,
+        "image_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "audio_tokens": 0,
+        "text_tokens": 0,
+        "image_tokens": 0
+      },
+      "cost": 1.613898e-05
+    },
+    "seconds": 36.636
+  },
+  "draft_contract_pass": true,
+  "review_packet_cost": {
+    "budget": 12000,
+    "utf8_bytes": 2032,
+    "token_upper_bound": 2032,
+    "remaining": 9968,
+    "exact_tokens": null,
+    "scope": "canonical_packet_json_only",
+    "model_calls": 0
+  },
+  "pass": true,
+  "limits": "Paid cloud smoke test is an explicit test exception; not evidence of offline-model quality or full-book quality. No image generation was requested."
+}

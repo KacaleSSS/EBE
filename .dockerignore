@@ -1,0 +1,14 @@
+.git
+.venv
+.venv*
+__pycache__
+**/__pycache__
+runtime
+projects
+spool
+models
+dist
+build
+*.egg-info
+.env*
+graphify-out

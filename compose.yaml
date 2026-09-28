@@ -1,0 +1,48 @@
+services:
+  core:
+    build: .
+    image: ebe:1.0.0
+    network_mode: none
+    read_only: true
+    user: "10001:10001"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 1g
+    cpus: 2
+    tmpfs: [/tmp:size=128m,noexec,nosuid,nodev]
+    volumes:
+      - ./runtime/projects:/data/projects
+      - ./runtime/mirror:/data/mirror
+      - ./runtime/spool:/spool
+    command: [doctor]
+  collector:
+    image: ebe:1.0.0
+    profiles: [collect]
+    read_only: true
+    user: "10001:10001"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 512m
+    cpus: 2
+    tmpfs: [/tmp:size=64m,noexec,nosuid,nodev]
+    volumes:
+      - ./runtime/spool:/spool
+    command: [fetch, /spool/requests.json, /spool/downloads]
+  images:
+    image: ebe:1.0.0
+    profiles: [images]
+    read_only: true
+    user: "10001:10001"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 512m
+    cpus: 2
+    stdin_open: true
+    tty: true
+    tmpfs: [/tmp:size=64m,noexec,nosuid,nodev]
+    volumes:
+      - ./runtime/image-exchange:/exchange
+    command: [--help]

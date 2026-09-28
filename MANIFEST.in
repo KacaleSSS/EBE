@@ -1,0 +1,9 @@
+include README.md LICENSE install.sh install.ps1 Dockerfile compose.yaml
+recursive-include docs *.md *.json
+recursive-include examples *.json *.md
+recursive-include tests *.py
+recursive-include ebe *.py
+global-exclude *.py[cod]
+prune runtime
+prune dist
+prune .venv

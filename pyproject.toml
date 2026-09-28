@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=78"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ebe-engine"
+version = "1.0.0"
+description = "EBE: private ebook research, sparse evidence review and publishing engine"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "KacaleSSS"}]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10", "Pillow>=11.3,<13", "reportlab>=4.4,<5", "pypdf>=6,<8"]
+images = ["Pillow>=11.3,<13"]
+pdf = ["reportlab>=4.4,<5", "Pillow>=11.3,<13"]
+
+[project.scripts]
+ebe = "ebe.cli:main"
+
+[project.urls]
+Repository = "https://github.com/KacaleSSS/EBE"
+Issues = "https://github.com/KacaleSSS/EBE/issues"
+
+[tool.setuptools.packages.find]
+include = ["ebe*"]

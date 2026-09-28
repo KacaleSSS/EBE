@@ -1,0 +1,29 @@
+name: Test EBE
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.12', '3.13']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install '.[test]'
+      - run: python -m pytest -q
+      - run: ebe doctor
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t ebe:ci .
+      - run: docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp:size=128m --tmpfs /data:uid=10001,gid=10001 ebe:ci doctor
+      - run: docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp:size=128m --tmpfs /data:uid=10001,gid=10001 ebe:ci init /data/projects test-book synthetic --single-copy
+      - name: Native socket cannot leave container
+        run: |
+          docker run --rm --network none --entrypoint python ebe:ci -c "import socket; s=socket.socket(); s.settimeout(2); result=s.connect_ex(('1.1.1.1',443)); print('egress_errno',result); assert result != 0"
