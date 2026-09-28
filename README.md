@@ -18,6 +18,8 @@ ebe --help
 
 核心无第三方 Python 依赖。PDF 解析需另外安装 Poppler (`pdftotext`)；图片与PDF导出需对应 extras。中文PDF需要合法中文 TTF 字体。Docker 镜像包含 Poppler，但不包含中文字体或语言模型权重。
 
+多 Python 环境可用 `EBE_PYTHON` 指定3.11+解释器。安装器会拒绝复用版本过低的现有 `.venv`，不会自动删除它；改用新解压目录即可。
+
 ## 隐私模式与网络边界
 
 | 进程 | 允许的数据与网络 |

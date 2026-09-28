@@ -178,7 +178,13 @@ def strict_readiness_from_connection(conn, engine, *, today=None):
             if not any(_current_primary(eligible[sid], risk, today) for sid in authorities):
                 failures.append(f"{cid}: reviewed primary current published_at required")
 
-    actual = _rows(conn, "SELECT batch_id, source_ids FROM acquisition_batches ORDER BY batch_id DESC LIMIT 2")
+    # Research creates this one table lazily. An initialized project with no
+    # acquisitions has zero batches; readiness must not migrate its database.
+    batch_table = conn.execute(
+        "SELECT 1 FROM main.sqlite_master WHERE name='acquisition_batches'"
+    ).fetchone()
+    actual = (_rows(conn, "SELECT batch_id, source_ids FROM main.acquisition_batches ORDER BY batch_id DESC LIMIT 2")
+              if batch_table else [])
     batches = meta.get("recent_batches")
     if len(actual) != 2 or not isinstance(batches, list) or len(batches) < 2:
         failures.append("two real recent acquisition batches required")

@@ -1,10 +1,12 @@
 """Synthetic SQLite fixtures only: no providers, network or private projects."""
 import copy
+from contextlib import closing
 from datetime import datetime, timezone, timedelta
 import importlib.util
 import json
 from pathlib import Path
 import sqlite3
+import subprocess
 import sys
 import tempfile
 import types
@@ -175,7 +177,25 @@ class ReadinessTest(unittest.TestCase):
 
     def test_missing_batch_table_fails_closed(self):
         self.conn.execute("DROP TABLE acquisition_batches")
-        self.assertFalse(self.result()["pass"])
+        self.conn.execute("PRAGMA query_only=ON")
+        install(self.engine)
+        result = self.engine.research_readiness_from_connection(self.conn)
+        self.assertFalse(result["pass"])
+        self.assertIn("two real recent acquisition batches required", result["strict_readiness"]["failures"])
+        self.assertNotIn("strict readiness invalid", str(result["failures"]))
+        self.assertIsNone(self.conn.execute("SELECT 1 FROM sqlite_master WHERE name='acquisition_batches'").fetchone())
+
+    def test_malformed_existing_batch_table_is_not_treated_as_empty(self):
+        self.conn.execute("ALTER TABLE acquisition_batches RENAME COLUMN source_ids TO broken_column")
+        result = self.result()
+        self.assertFalse(result["pass"])
+        self.assertIn("strict readiness invalid", str(result["failures"]))
+
+    def test_missing_required_table_still_fails_as_schema_error(self):
+        self.conn.execute("DROP TABLE sources")
+        result = self.result()
+        self.assertFalse(result["pass"])
+        self.assertIn("strict readiness invalid", str(result["failures"]))
 
     def test_body_missing_and_traversal(self):
         self.conn.execute("UPDATE sources SET text_path='../outside.txt' WHERE source_id='S0000'")
@@ -251,6 +271,29 @@ class ReadinessTest(unittest.TestCase):
         self.saved_review["required_readiness"] = {"pass": True}
         self.update_saved_review()
         self.assertFalse(self.result()["pass"])
+
+
+class EmptyProjectCLITest(unittest.TestCase):
+    def test_new_init_status_reports_missing_batches_without_creating_table(self):
+        with tempfile.TemporaryDirectory() as folder:
+            def cli(*args):
+                process = subprocess.run([sys.executable, "-m", "ebe", *map(str, args)],
+                                         cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=30)
+                self.assertEqual(process.returncode, 0, process.stderr)
+                return json.loads(process.stdout)
+
+            initialized = cli("init", folder, "empty-research", "Synthetic empty project", "--single-copy")
+            project = Path(initialized["project"])
+            status = cli("status", project)
+            for result in (initialized, status):
+                self.assertEqual(result["stage"], "initialized")
+                strict = result["research_readiness"]["strict_readiness"]
+                self.assertFalse(strict["pass"])
+                self.assertEqual(strict["qualified_sources"], 0)
+                self.assertIn("two real recent acquisition batches required", strict["failures"])
+                self.assertNotIn("strict readiness invalid", str(strict["failures"]))
+            with closing(sqlite3.connect(project / "state.sqlite3")) as conn:
+                self.assertIsNone(conn.execute("SELECT 1 FROM sqlite_master WHERE name='acquisition_batches'").fetchone())
 
 
 class FinalGateTest(unittest.TestCase):
