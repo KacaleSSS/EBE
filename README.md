@@ -2,7 +2,7 @@
 
 **KacaleSSS** · 面向中文与英文 ebook 的资料采集、证据交叉核验、持久化撰写及离线出版工具。
 
-默认不启用图片，不上传私人知识库，不捆绑任何 API key。交付形式为命令行、stdio MCP 和回环地址只读状态 API；可在自己的服务器上运行，经 SSH 使用。不是托管 SaaS，不含买家池。
+默认不启用图片，不上传私人知识库，不捆绑任何 API key。交付形式为命令行、stdio MCP 和回环地址只读状态 API；可在自己的服务器经 SSH 运行使用。不是托管 SaaS。
 
 ## 安装
 
@@ -71,7 +71,7 @@ OpenAlex/Brave 凭据仅从 collector 进程的 `OPENALEX_API_KEY` / `BRAVE_SEAR
 - 保留 **120篇已审核独立内容**的底线，以及维度覆盖、高风险主张和饱和度门槛。
 - 高风险/关键/快速变化主张全检；普通主张按分组确定性抽样20%，每组至少1条。
 - 每条最多3个来源包；同研究、转载和同发布机构保守归并；精确引用、矛盾、未检项都保留。
-- `review-plan` 用 UTF-8 字节限制审查包开销，是保守预算代理，不是假装精确 token 统计。模型提示词和输出另计。
+- `review-plan` 用 UTF-8 字节限制审查包开销，保守预算代理，模型提示词和输出另计。
 
 ```sh
 ebe review-plan ./runtime/projects/my-book claims.json review-plan.json --budget 12000 --model-version local-model-version
